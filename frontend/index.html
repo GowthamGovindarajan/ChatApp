@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>ChatApp – Real-Time Team Communication</title>
+    <link rel="stylesheet" href="assets/css/style.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+    <!-- ════════════════════════════════════
+         LOGIN SCREEN
+    ════════════════════════════════════ -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-card">
+            <div class="login-logo">
+                <i class="fa-solid fa-comments"></i>
+            </div>
+            <h1 class="login-title">ChatApp</h1>
+            <p class="login-subtitle">Real-Time Team Communication</p>
+
+            <div class="login-form">
+                <div class="input-group">
+                    <i class="fa-solid fa-user input-icon"></i>
+                    <input
+                        type="text"
+                        id="username-input"
+                        class="login-input"
+                        placeholder="Enter your username"
+                        maxlength="50"
+                        autocomplete="off"
+                    />
+                </div>
+                <div id="login-error" class="login-error hidden"></div>
+                <button id="join-btn" class="login-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    Join Chat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         MAIN CHAT LAYOUT
+    ════════════════════════════════════ -->
+    <div id="chat-screen" class="chat-screen hidden">
+
+        <!-- LEFT SIDEBAR – workspace nav -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="workspace-logo">
+                    <i class="fa-solid fa-comments"></i>
+                </div>
+                <div class="workspace-info">
+                    <span class="workspace-name">ChatApp</span>
+                    <span class="workspace-status">
+                        <span class="status-dot online"></span> Online
+                    </span>
+                </div>
+            </div>
+
+            <!-- Channels section -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">
+                    <span>Channels</span>
+                </div>
+                <ul class="channel-list">
+                    <li class="channel-item active" id="public-channel-btn" onclick="ChatController.switchToPublic()">
+                        <i class="fa-solid fa-hashtag"></i>
+                        <span>general</span>
+                        <span id="unread-public" class="unread-badge hidden">0</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Direct Messages section -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-header">
+                    <span>Direct Messages</span>
+                </div>
+                <ul id="dm-list" class="dm-list">
+                    <!-- Populated dynamically -->
+                </ul>
+            </div>
+
+            <!-- Current user badge -->
+            <div class="sidebar-footer">
+                <div class="current-user">
+                    <div class="user-avatar" id="sidebar-avatar">?</div>
+                    <div class="user-info">
+                        <span id="sidebar-username" class="user-name">–</span>
+                        <span class="user-status">Active</span>
+                    </div>
+                    <button class="logout-btn" onclick="ChatController.logout()" title="Leave chat">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- USERS PANEL – online people -->
+        <div class="users-panel">
+            <div class="users-panel-header">
+                <i class="fa-solid fa-users"></i>
+                <span>Online – <span id="online-count">0</span></span>
+            </div>
+            <ul id="online-users-list" class="online-users-list">
+                <!-- Populated dynamically -->
+            </ul>
+        </div>
+
+        <!-- MAIN CHAT AREA -->
+        <main class="chat-area">
+
+            <!-- Chat header -->
+            <div class="chat-header">
+                <div class="chat-header-left">
+                    <span id="chat-header-icon" class="chat-header-icon">
+                        <i class="fa-solid fa-hashtag"></i>
+                    </span>
+                    <div>
+                        <h2 id="chat-header-title" class="chat-title">general</h2>
+                        <span id="chat-header-subtitle" class="chat-subtitle">Team chat room</span>
+                    </div>
+                </div>
+                <div class="chat-header-right">
+                    <span id="connection-status" class="connection-badge connecting">
+                        <i class="fa-solid fa-circle"></i> Connecting…
+                    </span>
+                </div>
+            </div>
+
+            <!-- Messages container -->
+            <div id="messages-container" class="messages-container">
+                <div id="messages-list" class="messages-list"></div>
+            </div>
+
+            <!-- Typing indicator -->
+            <div id="typing-indicator" class="typing-indicator hidden">
+                <span class="typing-dots">
+                    <span></span><span></span><span></span>
+                </span>
+                <span id="typing-text">Someone is typing…</span>
+            </div>
+
+            <!-- Message input -->
+            <div class="message-input-area">
+                <div class="input-wrapper">
+                    <textarea
+                        id="message-input"
+                        class="message-input"
+                        placeholder="Message #general"
+                        rows="1"
+                        maxlength="1000"
+                    ></textarea>
+                    <div class="input-actions">
+                        <button id="send-btn" class="send-btn" title="Send (Enter)">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="input-hints">
+                    <span>Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</span>
+                    <span id="char-counter" class="char-counter">0 / 1000</span>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ────────────────────────────────────
+         JavaScript dependencies
+    ──────────────────────────────────────── -->
+    <!-- SockJS client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <!-- STOMP.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <!-- App modules (load order matters) -->
+    <script src="app/services/ApiService.js"></script>
+    <script src="app/services/WebSocketService.js"></script>
+    <script src="app/controllers/ChatController.js"></script>
+    <script src="app/app.js"></script>
+    
+
+</body>
+</html>
