@@ -1,0 +1,26 @@
+# Spring Boot
+target/
+
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Maven Wrapper Logs
+.mvn/wrapper/maven-wrapper.jar
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Application Configuration
+src/main/resources/application.properties
+
+# Logs
+*.log
+logs/
+
+# Build
+*.class
